@@ -3,16 +3,30 @@ const container = document.getElementById("game-container")
 const scoreEl = document.getElementById("score")
 
 let x = 185
+let targetX = x
 let score = 0
 let obstacles = []
 let dead = false
 
+container.addEventListener("touchmove", e => {
+  e.preventDefault()
+  const rect = container.getBoundingClientRect()
+  const touchX = e.touches[0].clientX - rect.left
+  targetX = Math.max(0, Math.min(370, touchX - 15))
+}, { passive: false })
+
 document.addEventListener("keydown", e => {
   if (dead) return
-  if (e.key === "ArrowLeft" && x > 0) x -= 20
-  if (e.key === "ArrowRight" && x < 370) x += 20
-  player.style.left = x + "px"
+  if (e.key === "ArrowLeft") targetX -= 40
+  if (e.key === "ArrowRight") targetX += 40
+  targetX = Math.max(0, Math.min(370, targetX))
 })
+
+function smoothMove() {
+  x += (targetX - x) * 0.2
+  player.style.left = x + "px"
+  requestAnimationFrame(smoothMove)
+}
 
 function spawn() {
   if (dead) return
@@ -47,5 +61,6 @@ function update() {
   })
 }
 
+smoothMove()
 setInterval(update, 50)
 setInterval(spawn, 1400)
